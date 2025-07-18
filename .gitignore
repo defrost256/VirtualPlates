@@ -31,8 +31,9 @@ _ReSharper*/
 .idea/
 #Nuget packages folder
 packages/
-Content/
+Content/**
 Intermediate/
 DerivedDataCache/
+!**/Python/
 *.png
 *.exr
