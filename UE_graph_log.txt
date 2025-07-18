@@ -1,0 +1,37 @@
+[2025.07.18-07.58.54:689][  2]LogWorld: Bringing World /Game/StonePineForest/Maps/Mountains_Map_LevelDesign.Mountains_Map_LevelDesign up for play (max tick rate 0) at 2025.07.18-09.58.54
+[2025.07.18-07.58.54:701][  2]LogWorld: Bringing up level for play took: 1.659752
+[2025.07.18-07.58.54:701][  2]LogGameMode: FindPlayerStart: PATHS NOT DEFINED or NO PLAYERSTART with positive rating
+[2025.07.18-07.58.54:714][  2]LogMovieRenderPipeline: Finished map load Mountains_Map_LevelDesign
+[2025.07.18-07.58.54:716][  2]LogMovieRenderPipeline: Zero Initial Delay, initializing...
+[2025.07.18-07.58.54:717][  2]LogMovieRenderPipeline: Initializing MovieGraph Render
+[2025.07.18-07.58.54:796][  2]LogMovieRenderPipeline: Reusing existing ShotInfo for Inner: CineCameraActor Outer: no shot.
+[2025.07.18-07.58.54:796][  2]LogMovieRenderPipeline: Registering range: [0,120000) (InnerName: CineCameraActor OuterName: no shot)
+[2025.07.18-07.58.54:800][  2]LogMovieRenderPipeline: Finished initializing MovieGraph Render
+[2025.07.18-07.58.54:800][  2]LogLoad: Took 8.397854 seconds to LoadMap(/Game/StonePineForest/Maps/Mountains_Map_LevelDesign)
+[2025.07.18-07.58.54:800][  2]LogGlobalStatus: UEngine::LoadMap Load map complete /Game/StonePineForest/Maps/Mountains_Map_LevelDesign
+[2025.07.18-07.58.55:372][  3]LogMovieRenderPipeline: MovieGraph Initializing Camera Cut [1/1] OuterName: [no shot] InnerName: CineCameraActor.
+[2025.07.18-07.58.55:374][  3]LogMovieScene: Starting new camera cut: 'CineCameraActor_2'
+[2025.07.18-07.58.55:374][  3]LogMovieRenderPipeline: Expanding Shot 1/1 (Shot: no shot Camera: CineCameraActor)
+[2025.07.18-07.58.55:378][  3]LogMovieRenderPipeline: Initialized Renderer: Deferred Layer: Global TileCount[1, 1]/[1, 1] AutoExposurePass: 0 HighRes: 0 PageToSystem: 0 TotalSceneViewStateReferences: 1
+[2025.07.18-07.58.55:378][  3]LogMovieRenderPipeline: Finished initializing 1 Render Passes (with 1 total layers and 1 cameras).
+[2025.07.18-07.58.55:379][  3]LogMovieScene: Starting new camera cut: 'CineCameraActor_2'
+[2025.07.18-07.58.55:379][  3]LogMovieRenderPipeline: MovieGraph Finished initializing Camera Cut [1/1] OuterName: [no shot]  InnerName: CineCameraActor.
+[2025.07.18-07.58.55:450][  3]LogMovieRenderPipeline: Set-up Renderer: Deferred Layer: Global AccumulatorResolution: [1920, 1080] BackbufferResolution: [1920, 1080]
+[2025.07.18-07.58.55:455][  3]LogMovieRenderPipeline: Allocated a View Render Target sized: (1920, 1080), Bytes: 16590112
+[2025.07.18-07.58.55:460][  3]LogStreaming: Display: FlushAsyncLoading(248): 1 QueuedPackages, 0 AsyncPackages
+[2025.07.18-07.58.55:476][  3]LogMovieRenderPipeline: Allocated a Surface Queue sized: (1920, 1080)
+[2025.07.18-07.58.55:477][  4]LogMovieRenderPipeline: Allocated a Accumulator Pool for AccumulatorType: ImageOverlappedAccumulator
+[2025.07.18-07.58.55:479][  4]LogMovieRenderPipeline: Allocated a Accumulator for Pool ImageOverlappedAccumulator, New Pool Count: 1
+[2025.07.18-07.58.55:533][  4]LogMovieRenderPipeline: Allocated a Accumulator for Pool ImageOverlappedAccumulator, New Pool Count: 2
+[2025.07.18-07.58.55:586][  5]LogRenderer: Recreating Persistent SBTs due to initializer changes: 
+		NumShaderSlotsPerGeometrySegment changed: current: 1 - new: 2
+		NumGeometrySegments changed: current: 0 - new: 512
+[2025.07.18-07.58.56:806][  5]LogD3D12RHI: Creating RTPSO with 204 shaders (8 cached, 196 new) took 1218.08 ms. Compile time 931.42 ms, link time 286.54 ms.
+[2025.07.18-07.58.57:634][  5]LogRenderer: Forcing update for all mesh draw commands: SkyLight real-time capture change
+[2025.07.18-07.58.57:671][  5]LogMovieRenderPipeline: Allocated a Accumulator for Pool ImageOverlappedAccumulator, New Pool Count: 3
+[2025.07.18-07.59.06:714][153]LogMovieRenderPipeline: MovieGraph Finished rendering last shot. Moving to Finalize to finish writing items to disk.
+[2025.07.18-07.59.06:721][153]LogMovieScene: Starting new camera cut: 'CineCameraActor_2'
+[2025.07.18-07.59.07:244][224]LogMovieRenderPipeline: MoviePipelineLinearExecutorBase finished 1 jobs in +00:00:20.853.
+[2025.07.18-07.59.07:244][224]LogWindows: FPlatformMisc::RequestExitWithStatus(0, 0, <NoCallSiteInfo>)
+[2025.07.18-07.59.07:244][224]LogCore: Engine exit requested (reason: Win RequestExit)
+[2025.07.18-07.59.07:244][224]LogMovieRenderPipeline: Movie Graph Render completed. Duration: +00:00:12.528

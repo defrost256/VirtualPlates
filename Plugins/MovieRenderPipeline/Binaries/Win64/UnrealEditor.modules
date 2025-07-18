@@ -1,0 +1,12 @@
+{
+	"BuildId": "43139311",
+	"Modules": 
+	{
+		"MovieRenderPipelineCore": "UnrealEditor-MovieRenderPipelineCore.dll",
+		"MovieRenderPipelineEditor": "UnrealEditor-MovieRenderPipelineEditor.dll",
+		"MovieRenderPipelineMP4Encoder": "UnrealEditor-MovieRenderPipelineMP4Encoder.dll",
+		"MovieRenderPipelineRenderPasses": "UnrealEditor-MovieRenderPipelineRenderPasses.dll",
+		"MovieRenderPipelineSettings": "UnrealEditor-MovieRenderPipelineSettings.dll",
+		"UEOpenExrRTTI": "UnrealEditor-UEOpenExrRTTI.dll"
+	}
+}

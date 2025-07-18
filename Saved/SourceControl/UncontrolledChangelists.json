@@ -1,0 +1,17 @@
+{
+	"version": 1,
+	"changelists": [
+		{
+			"guid": "00000000000000000000000000000000",
+			"description": "Default Uncontrolled Changelist",
+			"files": [
+				"C:/Users/danko/Documents/Unreal Projects/VirtualPlates/Plugins/VirtualPlateRender/Content/BP_SplineRider.uasset",
+				"C:/Users/danko/Documents/Unreal Projects/VirtualPlates/Content/StonePineForest/Maps/Mountains_Map_LevelDesign.umap",
+				"C:/Users/danko/Documents/Unreal Projects/VirtualPlates/Content/SEQ_MainComp.uasset",
+				"C:/Users/danko/Documents/Unreal Projects/VirtualPlates/Plugins/VirtualPlateRender/Content/MRG_DefaultPlateConfig.uasset",
+				"C:/Users/danko/Documents/Unreal Projects/VirtualPlates/Plugins/VirtualPlateRender/Content/BP_SceneSettings.uasset",
+				"C:/Users/danko/Documents/Unreal Projects/VirtualPlates/Content/BP_SplineRider.uasset"
+			]
+		}
+	]
+}

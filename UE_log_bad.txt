@@ -1,0 +1,89 @@
+[2025.07.18-06.19.12:222][  0]LogWorld: Bringing World /Game/StonePineForest/Maps/Mountains_Map_LevelDesign.Mountains_Map_LevelDesign up for play (max tick rate 0) at 2025.07.18-08.19.12
+[2025.07.18-06.19.12:232][  0]LogWorld: Bringing up level for play took: 1.397412
+[2025.07.18-06.19.12:233][  0]LogGameMode: FindPlayerStart: PATHS NOT DEFINED or NO PLAYERSTART with positive rating
+[2025.07.18-06.19.12:242][  0]LogLoad: Took 7.042599 seconds to LoadMap(/Game/StonePineForest/Maps/Mountains_Map_LevelDesign)
+[2025.07.18-06.19.12:242][  0]LogGlobalStatus: UEngine::LoadMap Load map complete /Game/StonePineForest/Maps/Mountains_Map_LevelDesign
+[2025.07.18-06.19.12:267][  0]LogSlate: Took 0.000478 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-Regular.ttf' (155K)
+[2025.07.18-06.19.12:294][  0]LogWindows: Attached monitors:
+[2025.07.18-06.19.12:294][  0]LogWindows:     resolution: 2560x1600, work area: (0, 0) -> (2560, 1552), device: '\\.\DISPLAY1' [PRIMARY]
+[2025.07.18-06.19.12:294][  0]LogWindows: Found 1 attached monitors.
+[2025.07.18-06.19.12:294][  0]LogWindows: Gathering driver information using Windows Setup API
+[2025.07.18-06.19.12:366][  0]LogOWLAuth: Display: Plugin Release Date:2025-06-19T13:16:14.000Z
+[2025.07.18-06.19.12:396][  0]LogAssetRegistry: Display: Triggering cache save on discovery complete
+[2025.07.18-06.19.12:424][  0]LogRenderer: Recreating Persistent SBTs due to initializer changes:
+                NumShaderSlotsPerGeometrySegment changed: current: 1 - new: 2
+                NumGeometrySegments changed: current: 0 - new: 512
+[2025.07.18-06.19.12:627][  0]LogAssetRegistry: Display: Asset registry cache read as 104.3 MiB from ../../../../../../Users/danko/Documents/Unreal Projects/VirtualPlates/Intermediate/CachedAssetRegistry_0.bin.
+[2025.07.18-06.19.12:628][  0]LogAssetRegistry: Display: AssetDataGatherer spent 0.211s loading caches ../../../../../../Users/danko/Documents/Unreal Projects/VirtualPlates/Intermediate/CachedAssetRegistry_*.bin.
+[2025.07.18-06.19.12:748][  0]LogAssetRegistry: AssetRegistryGather time 0.3134s: AssetDataDiscovery 0.0000s, AssetDataGather 0.2277s, StoreResults 0.0857s. Wall time 11.4870s.
+        NumCachedDirectories 1659. NumUncachedDirectories 31. NumCachedFiles 8916. NumUncachedFiles 1.
+        BackgroundTickInterruptions 0.
+[2025.07.18-06.19.12:886][  0]LogInit: Display: Engine is initialized. Leaving FEngineLoop::Init()
+[2025.07.18-06.19.12:886][  0]LogLoad: (Engine Initialization) Total time: 17.13 seconds
+[2025.07.18-06.19.12:906][  0]LogContentStreaming: Texture pool size now 1000 MB
+[2025.07.18-06.19.12:915][  0]LogCsvProfiler: Display: Metadata set : streamingpoolsizemb="1000"
+[2025.07.18-06.19.12:953][  0]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2025.07.18-06.19.12:982][  0]LogRenderer: Forcing update for all mesh draw commands: SkyLight real-time capture change
+[2025.07.18-06.19.13:141][  0]LogSlate: InvalidateAllWidgets triggered.  All widgets were invalidated
+[2025.07.18-06.19.13:211][  0]LogPython: Display: Running start-up script C:/Users/danko/Documents/Unreal Projects/VirtualPlates/Plugins/VirtualPlateRender/Content/Python/init_unreal.py... started...
+[2025.07.18-06.19.13:215][  0]LogPython: RealisVirtualPlateRenderExecutor: Initialized.
+[2025.07.18-06.19.13:215][  0]LogPython: Realis Virtual Plate Render Executor module loaded.
+
+[2025.07.18-06.19.13:219][  0]LogPython: Display: Running start-up script C:/Users/danko/Documents/Unreal Projects/VirtualPlates/Plugins/VirtualPlateRender/Content/Python/init_unreal.py... took 77.899 ms
+[2025.07.18-06.19.13:219][  0]LogPython: Display: Running start-up script C:/Program Files/Epic Games/UE_5.6/Engine/Plugins/Animation/ControlRig/Content/Python/init_unreal.py... started...
+[2025.07.18-06.19.13:257][  0]LogPython: registering <class 'ControlRigWorkflows.workflow_deformation_rig_preset.provider'>
+
+[2025.07.18-06.19.13:264][  0]LogPython: Display: Running start-up script C:/Program Files/Epic Games/UE_5.6/Engine/Plugins/Animation/ControlRig/Content/Python/init_unreal.py... took 45.075 ms (total: 122.974 ms)
+[2025.07.18-06.19.13:268][  0]LogPython: Display: Running start-up script C:/Program Files/Epic Games/UE_5.6/Engine/Plugins/MovieScene/MovieRenderPipeline/Content/Python/init_unreal.py... started...
+[2025.07.18-06.19.13:269][  0]LogPython: Display: Running start-up script C:/Program Files/Epic Games/UE_5.6/Engine/Plugins/MovieScene/MovieRenderPipeline/Content/Python/init_unreal.py... took 4.325 ms (total: 127.299 ms)
+[2025.07.18-06.19.13:270][  0]LogLiveCoding: Display: LiveCodingConsole Arguments: VirtualPlatesEditor Win64 Development
+[2025.07.18-06.19.14:001][  1]LogStreaming: Display: FlushAsyncLoading(236): 1 QueuedPackages, 0 AsyncPackages
+[2025.07.18-06.19.14:001][  1]LogMovieRenderPipeline: Loaded explicitly specified Movie Pipeline Executor /Script/MovieRenderPipelineCore.MoviePipelinePythonHostExecutor.
+[2025.07.18-06.19.14:001][  1]LogMovieRenderPipeline: Using default Movie Pipeline . See '-MoviePipelineClass' if you need to override this.
+[2025.07.18-06.19.14:001][  1]LogStreaming: Warning: LoadPackage: SkipPackage: /Engine/PythonTypes (0xB446D7D5D25A361D) - The package to load does not exist on disk or in the loader
+[2025.07.18-06.19.14:001][  1]LogMovieRenderPipeline: Loaded executor from Python class: /Engine/PythonTypes.RealisVirtualPlateRenderExecutor
+[2025.07.18-06.19.14:001][  1]LogPython: RealisVirtualPlateRenderExecutor: Initialized.
+[2025.07.18-06.19.14:001][  1]LogMovieRenderPipeline: Successfully detected and loaded required movie arguments. Rendering will begin once the map is loaded.
+[2025.07.18-06.19.14:001][  1]LogMovieRenderPipeline: ExecutorClass: RealisVirtualPlateRenderExecutor
+[2025.07.18-06.19.14:001][  1]LogPython: RealisVirtualPlateRenderExecutor: execute_delayed started.
+[2025.07.18-06.19.14:002][  1]LogMovieRenderPipeline: Generated new ShotInfo for Inner: CineCameraActor Outer: no shot (No existing shot found in the job).
+[2025.07.18-06.19.14:002][  1]LogMovieRenderPipeline: Registering range: [0,120000) (InnerName: CineCameraActor OuterName: no shot)
+[2025.07.18-06.19.14:004][  1]LogPython: RealisVirtualPlateRenderExecutor: Applying scene settings...
+[2025.07.18-06.19.14:004][  1]LogPython: RealisVirtualPlateRenderExecutor: Overrode 'Output path' (DirectoryPath) to: C:/Users/danko/Documents/Unreal Projects/VirtualPlates/Saved/RenderJobs/job_001
+[2025.07.18-06.19.14:004][  1]LogPython: RealisVirtualPlateRenderExecutor: Overrode 'Resolution' (NamedResolution) to: (ProfileName="Custom",Resolution=(X=1600,Y=900),Description="Render Farm Job")
+[2025.07.18-06.19.14:004][  1]LogPython: RealisVirtualPlateRenderExecutor: Initializing pipeline and starting render.
+[2025.07.18-06.19.14:004][  1]LogMovieRenderPipeline: [1] Initializing overall Movie Pipeline
+[2025.07.18-06.19.14:004][  1]LogMovieRenderPipeline: Reusing existing ShotInfo for Inner: CineCameraActor Outer: no shot.
+[2025.07.18-06.19.14:004][  1]LogMovieRenderPipeline: Registering range: [0,120000) (InnerName: CineCameraActor OuterName: no shot)
+[2025.07.18-06.19.14:054][  1]LogSlate: Took 0.000173 seconds to synchronously load lazily loaded font '../../../Engine/Content/Slate/Fonts/Roboto-Regular.ttf' (155K)
+[2025.07.18-06.19.14:075][  2]LogMovieRenderPipeline: Expanding Shot 1/1 (Shot: no shot Camera: CineCameraActor)
+[2025.07.18-06.19.14:075][  2]LogMovieRenderPipeline: [2] Initializing Camera Cut [1/1] in [no shot] CineCameraActor.
+[2025.07.18-06.19.14:075][  2]LogMovieRenderPipeline: [2] Initialization set state to WarmingUp due to having 1 warm up frames.
+[2025.07.18-06.19.14:076][  2]LogMovieScene: Starting new camera cut: 'CineCameraActor_2'
+[2025.07.18-06.19.14:076][  2]LogMovieRenderPipeline: Finished setting up rendering for shot. Shot has 0 Passes. Total resolution: (1920x1080) Individual tile resolution: (1920x1080). Tile count: (1x1)
+[2025.07.18-06.19.14:076][  2]LogMovieRenderPipeline: [2] Finished initializing Camera Cut [1/1] in [no shot] CineCameraActor.
+[2025.07.18-06.19.14:293][  2]LogWindows: LaunchURL https://account.offworld.live/validate/wCdUERi7iT0x2LsvmFMx9NpCXGrJkFPDKJ3
+[2025.07.18-06.19.17:367][  2]LogWindows: Attached monitors:
+[2025.07.18-06.19.17:368][  2]LogWindows:     resolution: 2560x1600, work area: (0, 0) -> (2560, 1552), device: '\\.\DISPLAY1' [PRIMARY]
+[2025.07.18-06.19.17:368][  2]LogWindows: Found 1 attached monitors.
+[2025.07.18-06.19.17:368][  2]LogWindows: Gathering driver information using Windows Setup API
+[2025.07.18-06.19.19:239][ 23]LogOWLAuth: Error: Auth Error 1028: Login denied for user -- usually account expired
+[2025.07.18-06.19.20:786][ 25]LogRenderer: Using fallback RTPSO
+[2025.07.18-06.19.20:803][ 25]LogD3D12RHI: Creating RTPSO with 228 shaders (0 cached, 2 new) took 17.70 ms. Compile time 9.63 ms, link time 8.02 ms.
+[2025.07.18-06.19.21:019][ 28]LogRenderer: Using fallback RTPSO
+[2025.07.18-06.19.21:920][ 67]LogRenderer: Using fallback RTPSO
+[2025.07.18-06.19.21:937][ 67]LogD3D12RHI: Creating RTPSO with 229 shaders (0 cached, 1 new) took 17.67 ms. Compile time 8.78 ms, link time 8.83 ms.
+[2025.07.18-06.19.21:969][ 68]LogRenderer: Using fallback RTPSO
+[2025.07.18-06.19.21:986][ 69]LogD3D12RHI: Creating RTPSO with 230 shaders (0 cached, 1 new) took 16.93 ms. Compile time 5.70 ms, link time 11.19 ms.
+[2025.07.18-06.19.23:523][145]LogRenderer: Using fallback RTPSO
+[2025.07.18-06.19.23:541][145]LogD3D12RHI: Creating RTPSO with 231 shaders (0 cached, 1 new) took 17.99 ms. Compile time 8.80 ms, link time 9.13 ms.
+[2025.07.18-06.19.23:741][154]LogMovieRenderPipeline: [154] Finished processing Camera Cut [1/1].
+[2025.07.18-06.19.23:741][154]LogMovieRenderPipeline: Error: Not all frames were fully submitted by the time rendering was torn down! Frames will be missing from output!
+[2025.07.18-06.19.23:741][154]LogMovieRenderPipeline: [154] Finished rendering last shot. Moving to Finalize to finish writing items to disk.
+[2025.07.18-06.19.23:760][154]LogMovieScene: Starting new camera cut: 'CineCameraActor_2'
+[2025.07.18-06.19.23:780][156]Scene texture extent history reset. Next scene render will reallocate textures at the requested size.
+[2025.07.18-06.19.23:780][156]LogMovieRenderPipeline: Movie Pipeline completed. Duration: +00:00:09.727
+[2025.07.18-06.19.23:781][156]LogPython: RealisVirtualPlateRenderExecutor: Movie pipeline finished successfully.
+[2025.07.18-06.19.23:781][156]LogWindows: FPlatformMisc::RequestExitWithStatus(0, 0, <NoCallSiteInfo>)
+[2025.07.18-06.19.23:781][156]LogCore: Engine exit requested (reason: Win RequestExit)
+[2025.07.18-06.19.23:813][157]LogCore: Engine exit requested (reason: EngineExit() was called; note: exit was already requested)
