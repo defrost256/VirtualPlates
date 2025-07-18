@@ -111,22 +111,24 @@ class RealisVirtualPlateRenderExecutor(unreal.MoviePipelinePythonHostExecutor):
         world = self.get_last_loaded_world()
 
         # Use the more reliable tag-based search.
-        # The user must add the tag 'SceneSettingsController' to their BP_SceneSettings actor in the editor.
-        actors_with_tag = unreal.GameplayStatics.get_all_actors_with_tag(world, "SceneSettingsController")
+        # The user must add the tag 'SceneSettings' to their BP_SceneSettings actor in the editor.
+        actors_with_tag = unreal.GameplayStatics.get_all_actors_with_tag(world, "SceneSettings")
         
         if not actors_with_tag:
-            unreal.log_error("RealisVirtualPlateRenderExecutor: Could not find any actor with tag 'SceneSettingsController'. Please tag your BP_SceneSettings actor.")
+            unreal.log_error("RealisVirtualPlateRenderExecutor: Could not find any actor with tag 'SceneSettings'. Please tag your BP_SceneSettings actor.")
             return
 
         scene_settings_actor = actors_with_tag[0]
-        unreal.log(f"Found actor with tag 'SceneSettingsController': {scene_settings_actor.get_name()}")
+        unreal.log(f"Found actor with tag 'SceneSettings': {scene_settings_actor.get_name()}")
 
+        settings_were_applied = False
         # This approach directly sets public, "Instance Editable" variables on the Blueprint.
         if "time_of_day" in settings_dict:
             try:
                 # The property name "time_of_day" must match the variable name in the Blueprint.
                 scene_settings_actor.set_editor_property("time_of_day", float(settings_dict["time_of_day"]))
                 unreal.log(f"RealisVirtualPlateRenderExecutor: Set property 'time_of_day' to {settings_dict['time_of_day']}")
+                settings_were_applied = True
             except Exception as e:
                 unreal.log_warning(f"Could not set 'time_of_day' property on actor. Make sure the variable exists, is a Float, and is 'Instance Editable'. Error: {e}")
 
@@ -135,8 +137,19 @@ class RealisVirtualPlateRenderExecutor(unreal.MoviePipelinePythonHostExecutor):
                 # The property name "cloud_coverage" must match the variable name in the Blueprint.
                 scene_settings_actor.set_editor_property("cloud_coverage", float(settings_dict["cloud_coverage"]))
                 unreal.log(f"RealisVirtualPlateRenderExecutor: Set property 'cloud_coverage' to {settings_dict['cloud_coverage']}")
+                settings_were_applied = True
             except Exception as e:
                 unreal.log_warning(f"Could not set 'cloud_coverage' property on actor. Make sure the variable exists, is a Float, and is 'Instance Editable'. Error: {e}")
+        
+        # If any setting was changed, signal to the Blueprint that its settings have been modified.
+        if settings_were_applied:
+            try:
+                # The property name "dirty_settings" must match the variable name in the Blueprint.
+                scene_settings_actor.set_editor_property("dirty_settings", True)
+                unreal.log(f"RealisVirtualPlateRenderExecutor: Set property 'dirty_settings' to True.")
+            except Exception as e:
+                unreal.log_warning(f"Could not set 'dirty_settings' property on actor. Make sure the variable exists, is a Boolean, and is 'Instance Editable'. Error: {e}")
+
 
     @unreal.ufunction(ret=None, params=[unreal.MoviePipelineOutputData])
     def on_movie_pipeline_finished(self, results):
