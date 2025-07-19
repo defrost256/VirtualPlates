@@ -13,7 +13,7 @@ class AgentLogic:
         """
         Initializes the agent's logic controller.
         :param config: A dictionary containing configuration like UE path, jobs directory.
-        :param callbacks: A dictionary of functions to call for events.
+        :param callbacks: A dictionary of functions for events.
                           Expected keys: 'on_status_update', 'on_job_finished'.
         """
         self.config = config
@@ -25,10 +25,15 @@ class AgentLogic:
         self.current_job_data = None
         self.last_known_status = self._get_idle_status()
 
+    # --- Public Methods ---
+
     def get_current_status(self):
-        """Returns the last known status of the agent."""
+        """
+        Thread-safely gets the last known status report of the agent.
+        This is one of only two methods that should acquire the lock.
+        """
         with self.state_lock:
-            return self.last_known_status
+            return self.last_known_status.copy()
 
     def start_job(self, job_data):
         """
@@ -36,17 +41,61 @@ class AgentLogic:
         :param job_data: A dictionary containing the job definition.
         :return: True if the job was started, False if the agent was busy.
         """
+        job_id = job_data.get('job_id', 'unknown_job')
+        
+        # Atomically check if busy and set the new state if not.
+        if not self._set_state_to_busy(job_data):
+            print("Logic: Agent is busy, rejecting job.")
+            return False
+
+        print(f"Logic: Accepted new job: {job_id}")
+        
+        # Immediately report that the agent is starting the job.
+        starting_status = self._get_idle_status()
+        starting_status.update({
+            "status": "Starting",
+            "job_id": job_id,
+            "timestamp": time.time()
+        })
+        self._update_and_broadcast_status(starting_status)
+        
+        # The monitoring process will run in a separate thread.
+        threading.Thread(target=self._execute_and_monitor_job).start()
+        return True
+
+    # --- Private, Thread-Safe State Modifiers ---
+
+    def _update_and_broadcast_status(self, new_status_report):
+        """
+        Thread-safely updates the agent's status and calls the broadcast callback.
+        This is one of only two methods that should acquire the lock.
+        """
+        with self.state_lock:
+            self.last_known_status = new_status_report
+        
+        # Broadcast the update *after* releasing the lock.
+        self.callbacks['on_status_update'](new_status_report)
+        
+    def _set_state_to_busy(self, job_data):
+        """Atomically checks and sets the agent to a busy state."""
         with self.state_lock:
             if self.is_busy:
-                print("Logic: Agent is busy, rejecting job.")
                 return False
-            
-            print(f"Logic: Accepted new job: {job_data.get('job_id')}")
             self.is_busy = True
             self.current_job_data = job_data
-            # The monitoring process will run in a separate thread.
-            threading.Thread(target=self._execute_and_monitor_job).start()
             return True
+            
+    def _set_state_to_idle(self):
+        """Atomically sets the agent to an idle state."""
+        with self.state_lock:
+            self.is_busy = False
+            self.current_job_data = None
+        
+        # Create and broadcast the new idle status
+        idle_status = self._get_idle_status()
+        self._update_and_broadcast_status(idle_status)
+
+    # --- Core Job Execution Logic ---
 
     def _execute_and_monitor_job(self):
         """The private method that launches and monitors the UE process."""
@@ -84,21 +133,28 @@ class AgentLogic:
 
         # --- Final Status Check ---
         return_code = process.returncode
-        if return_code != 0 and (not self.last_known_status or self.last_known_status.get("status") != "Error"):
+        last_status = self.get_current_status()
+
+        if return_code != 0 and last_status.get("status") != "Error":
             error_status = {
                 "timestamp": time.time(), "job_id": job_id, "status": "Error",
                 "reason": f"Process crashed with exit code {return_code}"
             }
-            self._update_status(error_status)
+            self._update_and_broadcast_status(error_status)
 
         # --- Cleanup ---
-        with self.state_lock:
-            self.is_busy = False
-            self.current_job_data = None
-            # Set status back to idle and notify directors
-            self._update_status(self._get_idle_status())
-            print(f"Logic: Job {job_id} finished. Agent is now idle.")
-            self.callbacks['on_job_finished']()
+        job_was_completed = last_status.get("status") == "Completed"
+
+        # If the job just completed, wait 2 seconds before becoming idle.
+        # This is done OUTSIDE any lock.
+        if job_was_completed:
+            print(f"Logic: Job {job_id} completed. Waiting 2 seconds before becoming idle.")
+            time.sleep(2)
+
+        # Atomically reset the agent state to idle.
+        self._set_state_to_idle()
+        print(f"Logic: Job {job_id} finished. Agent is now idle.")
+        self.callbacks['on_job_finished']()
 
     def _check_progress_file(self, progress_file):
         """Reads the last line of the progress file and triggers status update."""
@@ -112,16 +168,11 @@ class AgentLogic:
             if lines:
                 last_line = lines[-1].strip()
                 status_data = json.loads(last_line)
-                if status_data != self.last_known_status:
-                    self._update_status(status_data)
+                # Only broadcast if the status has actually changed.
+                if status_data != self.get_current_status():
+                    self._update_and_broadcast_status(status_data)
         except (IOError, json.JSONDecodeError) as e:
             print(f"Warning: Could not read or parse progress file: {e}")
-
-    def _update_status(self, status_data):
-        """Thread-safe method to update internal status and call the broadcast callback."""
-        with self.state_lock:
-            self.last_known_status = status_data
-        self.callbacks['on_status_update'](status_data)
 
     def _get_idle_status(self):
         """Generates a standard 'Idle' status dictionary."""

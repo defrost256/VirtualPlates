@@ -88,6 +88,7 @@ button:hover {
 .agent-card.status-error { border-left-color: #e74c3c; }
 .agent-card.status-completed { border-left-color: #3498db; }
 .agent-card.status-connecting { border-left-color: #9b59b6; }
+.agent-card.status-starting { border-left-color: #8e44ad; } /* New status color */
 
 
 .status-line {

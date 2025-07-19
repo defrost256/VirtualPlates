@@ -3,6 +3,8 @@ import threading
 import json
 import os
 
+AGENTS_SAVE_FILE = 'director_agents.json'
+
 class DirectorLogic:
     """
     Handles all the backend logic for the Director, including state management
@@ -18,6 +20,9 @@ class DirectorLogic:
         self.events = event_callbacks
         self.agents = {}
         self.agents_lock = threading.Lock()
+        
+        # On startup, load previously known agents and try to connect to them.
+        self._load_and_connect_agents()
 
     # --- Methods Called by the UI Controller ---
 
@@ -34,6 +39,10 @@ class DirectorLogic:
         if not ip_port_str:
             return
         self.log(f"UI requested connection to agent: {ip_port_str}")
+        
+        # Save the agent so we remember it for next time.
+        self._add_agent_to_save_file(ip_port_str)
+        
         threading.Thread(target=self._handle_agent_connection, args=(ip_port_str,)).start()
 
     def submit_job_to_agent(self, agent_id, job_path):
@@ -83,8 +92,7 @@ class DirectorLogic:
             agent_id = initial_status.get('agent_id', ip_port_str)
 
             with self.agents_lock:
-                # Create the agent's data structure, populating the public
-                # part directly with the status received from the agent.
+                # Create the agent's data structure
                 self.agents[agent_id] = {
                     'internal': {'socket': sock},
                     'public': {
@@ -92,7 +100,8 @@ class DirectorLogic:
                         'ip': ip_port_str
                     }
                 }
-                # Merge the full initial status into the public data.
+                # Merge the full initial status into the public data. This ensures
+                # the status is immediately correct (e.g., "Idle").
                 self.agents[agent_id]['public'].update(initial_status)
             
             # Use the callback to notify the UI of the connection and the correct initial state.
@@ -126,6 +135,45 @@ class DirectorLogic:
         """Internal method to update state and trigger the UI callback."""
         with self.agents_lock:
             if agent_id in self.agents:
+                # Log when a job is completed
+                if status_data.get('status') == 'Completed':
+                    job_id = self.agents[agent_id]['public'].get('job_id')
+                    if job_id:
+                        self.log(f"Job '{job_id}' on agent '{agent_id}' completed successfully.")
+
                 self.agents[agent_id]['public'].update(status_data)
         
         self.events['on_agent_status_update'](agent_id, status_data)
+
+    # --- Agent Persistence ---
+    
+    def _load_and_connect_agents(self):
+        """Loads agent IPs from the save file and attempts to connect."""
+        try:
+            if os.path.exists(AGENTS_SAVE_FILE):
+                with open(AGENTS_SAVE_FILE, 'r') as f:
+                    saved_agents = json.load(f)
+                self.log(f"Loaded {len(saved_agents)} agents from save file.")
+                for ip_port in saved_agents:
+                    self.connect_to_agent(ip_port)
+        except (IOError, json.JSONDecodeError) as e:
+            self.log(f"Could not load agent save file: {e}")
+
+    def _add_agent_to_save_file(self, ip_port_str):
+        """Adds a new agent IP to the save file if it's not already there."""
+        saved_agents = []
+        if os.path.exists(AGENTS_SAVE_FILE):
+            try:
+                with open(AGENTS_SAVE_FILE, 'r') as f:
+                    saved_agents = json.load(f)
+            except (IOError, json.JSONDecodeError):
+                pass # If file is corrupt, we'll overwrite it.
+
+        if ip_port_str not in saved_agents:
+            saved_agents.append(ip_port_str)
+            try:
+                with open(AGENTS_SAVE_FILE, 'w') as f:
+                    json.dump(saved_agents, f, indent=4)
+                self.log(f"Saved new agent '{ip_port_str}' to file.")
+            except IOError as e:
+                self.log(f"Error saving agent list: {e}")
