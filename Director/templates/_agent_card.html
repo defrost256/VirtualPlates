@@ -1,0 +1,17 @@
+<!-- This is not a complete HTML file. It's a partial template. -->
+<!-- The main JavaScript will build this dynamically. -->
+<div class="agent-card-header">
+    <h3>AGENT: {{ agent_id }}</h3>
+    <div class="status-line"><strong>Status:</strong> <span class="status-text">{{ status }}</span></div>
+</div>
+<div class="agent-card-details">
+    <div class="status-line"><strong>IP Address:</strong> {{ ip }}</div>
+    <div class="status-line"><strong>Current Job:</strong> {{ job_id }}</div>
+    {% if status == 'Rendering' %}
+    <div class="progress-bar-container">
+        <div class="progress-bar" style="width: {{ progress * 100 }}%"></div>
+    </div>
+    <div class="status-line">Progress: <strong>{{ (progress * 100).toFixed(1) }}%</strong> (Frame: {{ current_frame }})</div>
+    {% endif %}
+    <button class="btn-disconnect" data-agent-id="{{ agent_id }}">Disconnect</button>
+</div>

@@ -1,0 +1,59 @@
+<!-- This is not a complete HTML file. It's a partial template. -->
+<div class="job-factory-container">
+    <div class="tabs">
+        <button class="tab-link active" onclick="openTab(event, 'tab-project')">Project</button>
+        <button class="tab-link" onclick="openTab(event, 'tab-sequence')">Sequence</button>
+        <button class="tab-link" onclick="openTab(event, 'tab-scene')">Scene</button>
+        <button class="tab-link" onclick="openTab(event, 'tab-output')">Output</button>
+    </div>
+
+    <div id="tab-project" class="tab-content" style="display: block;">
+        <h4>Project Settings</h4>
+        <div class="form-group"><label for="project_path">Project Path (.uproject)</label><input type="text" id="project_path" value="C:/Users/danko/Documents/Unreal Projects/VirtualPlates/VirtualPlates.uproject"></div>
+        <div class="form-group"><label for="graph_path">Graph Path</label><input type="text" id="graph_path" value="/VirtualPlateRender/MRG_DefaultPlateConfig"></div>
+        <div class="form-group"><label for="level_path">Level Path</label><input type="text" id="level_path" value="/Game/StonePineForest/Maps/Mountains_Map_LevelDesign"></div>
+    </div>
+
+    <div id="tab-sequence" class="tab-content">
+        <h4>Sequence Settings</h4>
+        <div class="form-group"><label for="sequence_path">Sequence Path</label><input type="text" id="sequence_path" value="/Game/SEQ_MainComp"></div>
+        <div class="form-group"><label for="camera_name">Camera Name</label><input type="text" id="camera_name" value="CineCameraActor"></div>
+    </div>
+
+    <div id="tab-scene" class="tab-content">
+        <h4>Scene Settings</h4>
+        <!-- Scene parameters will be added here dynamically if needed -->
+        <div class="form-group slider-group">
+            <label for="time_of_day">Time of Day (0-2400)</label>
+            <input type="range" id="time_of_day" min="0" max="2400" value="1600" class="slider">
+            <input type="number" id="time_of_day_value" value="1600" class="slider-value">
+        </div>
+        <div class="form-group slider-group">
+            <label for="cloud_coverage">Cloud Coverage (0-5)</label>
+            <input type="range" id="cloud_coverage" min="0" max="5" value="0.2" step="0.1" class="slider">
+            <input type="number" id="cloud_coverage_value" value="0.2" step="0.1" class="slider-value">
+        </div>
+    </div>
+
+    <div id="tab-output" class="tab-content">
+        <h4>Output Settings</h4>
+        <div class="form-group resolution-group">
+            <label>Resolution</label>
+            <div>
+                <input type="number" id="res_x" value="1600">
+                <span>x</span>
+                <input type="number" id="res_y" value="900">
+            </div>
+        </div>
+    </div>
+    
+    <div class="submission-section">
+        <div class="form-group">
+            <label for="assign-agent-select">Assign to Agent</label>
+            <select id="assign-agent-select">
+                <option value="">-- No Idle Agents --</option>
+            </select>
+        </div>
+        <button id="btn-submit-job">Submit Job</button>
+    </div>
+</div>

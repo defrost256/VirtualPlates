@@ -1,1 +1,17 @@
-{"job_id":"job_001","project_path":"C:\\Users\\danko\\Documents\\Unreal Projects\\VirtualPlates\\VirtualPlates.uproject","graph_path":"/VirtualPlateRender/MRG_DefaultPlateConfig","level_path":"/Game/StonePineForest/Maps/Mountains_Map_LevelDesign","sequence_path":"/Game/SEQ_MainComp","camera_actor_name":"shot_010_camera","output_path":"C:/Users/danko/Documents/UnrealProjects/VirtualPlates/Saved/RenderJobs/job_001","resolution":[1600,900],"scene_settings":{"time_of_day":1600,"cloud_coverage":0.2}}
+{
+    "job_id": "job_001",
+    "project_path": "C:\\Users\\danko\\Documents\\Unreal Projects\\VirtualPlates\\VirtualPlates.uproject",
+    "graph_path": "/VirtualPlateRender/MRG_DefaultPlateConfig",
+    "level_path": "/Game/StonePineForest/Maps/Mountains_Map_LevelDesign",
+    "sequence_path": "/Game/SEQ_MainComp",
+    "camera_actor_name": "shot_010_camera",
+    "output_path": "C:/Users/danko/Documents/UnrealProjects/VirtualPlates/Saved/RenderJobs/job_001",
+    "resolution": [
+        1600,
+        900
+    ],
+    "scene_settings": {
+        "time_of_day": 1600,
+        "cloud_coverage": 0.2
+    }
+}

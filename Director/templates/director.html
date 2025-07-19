@@ -20,28 +20,19 @@
                     </div>
                     <button id="btn-add-agent">Connect to Agent</button>
                 </div>
-
-                <div class="control-section">
-                    <h3>CREATE NEW RENDER JOB</h3>
-                    <div class="form-group">
-                        <label for="job-json-path">Job JSON Path</label>
-                        <input type="text" id="job-json-path" placeholder="C:\Path\To\Job.json">
-                    </div>
-                    <div class="form-group">
-                        <label for="assign-agent-select">Assign to Agent</label>
-                        <select id="assign-agent-select">
-                            <option value="">-- No Idle Agents --</option>
-                        </select>
-                    </div>
-                    <button id="btn-submit-job">Submit Job</button>
-                </div>
             </div>
+        </div>
+
+        <div class="panel" id="job-factory-panel">
+            <h2>Job Factory</h2>
+            {% include '_job_factory.html' %}
         </div>
 
         <div class="panel" id="status-panel">
             <h2>Render Farm Status</h2>
             <div id="agent-status-container">
-                </div>
+                <!-- Agent status cards will be inserted here by JavaScript -->
+            </div>
         </div>
 
         <div class="panel" id="log-panel">
@@ -58,57 +49,48 @@
         const addAgentBtn = document.getElementById('btn-add-agent');
         const submitJobBtn = document.getElementById('btn-submit-job');
         const agentIpInput = document.getElementById('agent-ip');
-        const jobPathInput = document.getElementById('job-json-path');
         const agentSelect = document.getElementById('assign-agent-select');
         const logOutput = document.getElementById('log-output');
         const agentStatusContainer = document.getElementById('agent-status-container');
 
         // --- Event Listeners ---
-        addAgentBtn.addEventListener('click', () => {
-            const ip = agentIpInput.value;
-            if (ip) {
-                socket.emit('add_agent', { ip: ip });
-            }
-        });
+        addAgentBtn.addEventListener('click', () => socket.emit('add_agent', { ip: agentIpInput.value }));
 
         submitJobBtn.addEventListener('click', () => {
             const agentId = agentSelect.value;
-            const jobPath = jobPathInput.value;
-            if (agentId && jobPath) {
-                socket.emit('submit_job', { agent_id: agentId, job_path: jobPath });
-            } else {
-                addLogMessage('Error: Must select an idle agent and specify a job path.');
+            if (!agentId) {
+                addLogMessage('Error: Must select an idle agent.');
+                return;
             }
+            
+            const formData = {
+                project_path: document.getElementById('project_path').value,
+                graph_path: document.getElementById('graph_path').value,
+                level_path: document.getElementById('level_path').value,
+                sequence_path: document.getElementById('sequence_path').value,
+                camera_name: document.getElementById('camera_name').value,
+                time_of_day: document.getElementById('time_of_day').value,
+                cloud_coverage: document.getElementById('cloud_coverage').value,
+                res_x: document.getElementById('res_x').value,
+                res_y: document.getElementById('res_y').value,
+            };
+            
+            socket.emit('submit_job', { agent_id: agentId, form_data: formData });
         });
-
 
         // --- Socket.IO Event Handlers ---
-        socket.on('connect', () => {
-            addLogMessage('Successfully connected to Director backend.');
-        });
-
-        socket.on('log_message', (data) => {
-            addLogMessage(data.message);
-        });
-
+        socket.on('connect', () => addLogMessage('Successfully connected to Director backend.'));
+        socket.on('log_message', (data) => addLogMessage(data.message));
         socket.on('agent_update', (data) => {
             updateAgentStatus(data);
             updateAgentDropdown(data.all_agents);
         });
-        
         socket.on('disconnect_agent', (data) => {
              const agentCard = document.getElementById(`agent-card-${data.agent_id}`);
-             if (agentCard) {
-                agentCard.remove();
-             }
-             // We need to refetch the full agent list to update the dropdown
+             if (agentCard) agentCard.remove();
              socket.emit('request_agent_list_update');
         });
-        
-        socket.on('update_agent_dropdown', (data) => {
-            updateAgentDropdown(data.all_agents);
-        });
-
+        socket.on('update_agent_dropdown', (data) => updateAgentDropdown(data.all_agents));
 
         // --- UI Update Functions ---
         function addLogMessage(message) {
@@ -141,35 +123,64 @@
 
             if (!agentCard) {
                 agentCard = document.createElement('div');
-                agentCard.className = 'agent-card';
                 agentCard.id = `agent-card-${agentId}`;
                 agentStatusContainer.appendChild(agentCard);
             }
             
             const status = agentData.status || 'Connecting...';
-            const progress = agentData.progress || 0;
-            const jobId = agentData.job_id || 'N/A';
-            const frame = agentData.current_frame || 0;
-
             agentCard.className = `agent-card status-${status.toLowerCase()}`;
 
-            let progressHtml = '';
-            if (status === 'Rendering') {
-                progressHtml = `
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" style="width: ${progress * 100}%"></div>
-                    </div>
-                    <div>${(progress * 100).toFixed(1)}% (Frame: ${frame})</div>
-                `;
-            }
-
+            // This is a client-side template for the agent card content
             agentCard.innerHTML = `
-                <h3>AGENT: ${agentId}</h3>
-                <div class="status-line"><strong>Status:</strong> <span class="status-text">${status}</span></div>
-                <div class="status-line"><strong>Current Job:</strong> ${jobId}</div>
-                ${progressHtml}
+                <div class="agent-card-header">
+                    <h3>AGENT: ${agentId}</h3>
+                    <div class="status-line"><strong>Status:</strong> <span class="status-text">${status}</span></div>
+                </div>
+                <div class="agent-card-details">
+                    <div class="status-line"><strong>IP Address:</strong> ${agentData.ip}</div>
+                    <div class="status-line"><strong>Current Job:</strong> ${agentData.job_id || 'N/A'}</div>
+                    ${status === 'Rendering' ? `
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: ${agentData.progress * 100}%"></div>
+                        </div>
+                        <div class="status-line">Progress: <strong>${(agentData.progress * 100).toFixed(1)}%</strong> (Frame: ${agentData.current_frame})</div>
+                    ` : ''}
+                    <button class="btn-disconnect" data-agent-id="${agentId}">Disconnect</button>
+                </div>
             `;
+            bindAgentCardEvents(agentCard);
         }
+        
+        function bindAgentCardEvents(cardElement) {
+            const header = cardElement.querySelector('.agent-card-header');
+            header.addEventListener('click', () => {
+                cardElement.classList.toggle('expanded');
+            });
+            
+            const disconnectBtn = cardElement.querySelector('.btn-disconnect');
+            disconnectBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent card from toggling when button is clicked
+                const agentId = e.target.dataset.agentId;
+                if (confirm(`Are you sure you want to disconnect agent ${agentId}?`)) {
+                    socket.emit('disconnect_agent_request', { agent_id: agentId });
+                }
+            });
+        }
+        
+        // --- Job Factory UI Logic ---
+        function openTab(evt, tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = "none");
+            document.querySelectorAll('.tab-link').forEach(link => link.className = link.className.replace(" active", ""));
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        
+        document.querySelectorAll('.slider-group').forEach(group => {
+            const slider = group.querySelector('.slider');
+            const valueInput = group.querySelector('.slider-value');
+            slider.oninput = () => valueInput.value = slider.value;
+            valueInput.oninput = () => slider.value = valueInput.value;
+        });
 
     </script>
 </body>
