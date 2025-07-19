@@ -1,0 +1,126 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #2c2c2c;
+    color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+}
+
+.main-container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+h1, h2, h3 {
+    color: #7abfe4;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+}
+
+.panel {
+    background-color: #3a3a3a;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.control-sections {
+    display: flex;
+    gap: 40px;
+}
+
+.control-section {
+    flex: 1;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+input[type="text"], select {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #555;
+    background-color: #252525;
+    color: #f0f0f0;
+    box-sizing: border-box;
+}
+
+button {
+    padding: 10px 15px;
+    border-radius: 4px;
+    border: none;
+    background-color: #007acc;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0099ff;
+}
+
+#agent-status-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.agent-card {
+    background-color: #454545;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 5px solid #666; /* Default color */
+}
+
+.agent-card.status-rendering { border-left-color: #f39c12; }
+.agent-card.status-idle { border-left-color: #2ecc71; }
+.agent-card.status-error { border-left-color: #e74c3c; }
+.agent-card.status-completed { border-left-color: #3498db; }
+.agent-card.status-connecting { border-left-color: #9b59b6; }
+
+
+.status-line {
+    margin-bottom: 8px;
+}
+
+.status-text {
+    font-weight: bold;
+}
+
+.progress-bar-container {
+    width: 100%;
+    background-color: #2c2c2c;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 20px;
+    margin: 10px 0;
+}
+
+.progress-bar {
+    width: 0%;
+    height: 100%;
+    background-color: #2ecc71;
+    transition: width 0.5s ease;
+}
+
+.log-box {
+    background-color: #252525;
+    height: 200px;
+    overflow-y: scroll;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.9em;
+    border: 1px solid #555;
+}

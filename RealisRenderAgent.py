@@ -46,14 +46,13 @@ class RenderAgent:
         """Starts the main TCP server loop to accept Director connections."""
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((self.host, self.port))
-        server_socket.listen(5) # Allow up to 5 connections to queue up
+        server_socket.listen(5)
         print(f"Agent '{self.agent_id}' listening on {self.host}:{self.port}")
 
         while True:
             try:
                 conn, addr = server_socket.accept()
                 print(f"Accepted connection from Director at {addr}")
-                # Each director gets its own thread to handle communication
                 threading.Thread(target=self.handle_director, args=(conn, addr)).start()
             except Exception as e:
                 print(f"Error in server accept loop: {e}")
@@ -63,17 +62,19 @@ class RenderAgent:
         with self.state_lock:
             self.director_connections.append(conn)
 
-        # --- On Connect: Send current status ---
         try:
             with self.state_lock:
-                if self.is_busy and self.current_job_data:
-                    # If busy, send the job description and the last known status
-                    conn.sendall((json.dumps({"type": "job_info", "data": self.current_job_data}) + '\n').encode('utf-8'))
-                    if self.last_known_status:
-                        conn.sendall((json.dumps(self.last_known_status) + '\n').encode('utf-8'))
+                if self.is_busy and self.last_known_status:
+                    # If busy, send the last known status immediately.
+                    conn.sendall((json.dumps(self.last_known_status) + '\n').encode('utf-8'))
                 else:
-                    # If idle, send an idle status
-                    conn.sendall((json.dumps({"status": "Idle", "agent_id": self.agent_id}) + '\n').encode('utf-8'))
+                    # If idle, send a complete idle status report.
+                    idle_status = {
+                        "timestamp": time.time(), "job_id": None,
+                        "status": "Idle", "agent_id": self.agent_id,
+                        "progress": 0, "current_frame": 0
+                    }
+                    conn.sendall((json.dumps(idle_status) + '\n').encode('utf-8'))
         except socket.error as e:
             print(f"Error sending initial status to {addr}: {e}")
             self.cleanup_connection(conn)
@@ -85,7 +86,7 @@ class RenderAgent:
                 data = conn.recv(4096)
                 if not data:
                     print(f"Director {addr} disconnected.")
-                    break # Exit loop on disconnect
+                    break
 
                 job_data = json.loads(data.decode('utf-8'))
                 
@@ -98,19 +99,13 @@ class RenderAgent:
                         print(f"Accepted new job from {addr}.")
                         self.is_busy = True
                         self.current_job_data = job_data
-                        # Start the single render monitoring thread
                         threading.Thread(target=self.execute_and_monitor_job).start()
 
             except (json.JSONDecodeError, KeyError) as e:
                 print(f"Received invalid job data from {addr}: {e}")
-                error_msg = {"status": "error", "message": f"Invalid job data format: {e}"}
-                try:
-                    conn.sendall((json.dumps(error_msg) + '\n').encode('utf-8'))
-                except socket.error:
-                    pass # Connection may already be closed
             except socket.error:
                 print(f"Director {addr} connection lost.")
-                break # Exit loop on connection error
+                break
         
         self.cleanup_connection(conn)
 
@@ -130,10 +125,8 @@ class RenderAgent:
                 try:
                     conn.sendall((json.dumps(status_data) + '\n').encode('utf-8'))
                 except socket.error:
-                    print(f"Failed to send status to a director. Marking for removal.")
                     dead_connections.append(conn)
             
-            # Clean up any connections that failed during the broadcast
             for conn in dead_connections:
                 self.cleanup_connection(conn)
 
@@ -152,7 +145,7 @@ class RenderAgent:
             os.remove(progress_file_path)
 
         command = [
-            f'"{self.ue_path}"', # Add quotes to handle spaces in path
+            f'"{self.ue_path}"',
             f'"{job_data["project_path"]}"',
             "-game", "-MoviePipelineClass=/Script/MovieRenderPipelineCore.MovieGraphPipeline",
             "-MoviePipelineLocalExecutorClass=/Script/MovieRenderPipelineCore.MoviePipelinePythonHostExecutor",
@@ -162,10 +155,8 @@ class RenderAgent:
             f'-ProgressFile="{progress_file_path}"'
         ]
         
-        print(f"Executing command: {' '.join(command)}")
         process = subprocess.Popen(' '.join(command), shell=True)
 
-        # --- Monitoring Loop ---
         while process.poll() is None:
             time.sleep(1)
             try:
@@ -181,20 +172,20 @@ class RenderAgent:
                     if status_data != self.last_known_status:
                         self.broadcast_status(status_data)
                         if status_data.get("status") in ["Completed", "Error"]:
-                            break # Exit monitor loop on final status
+                            break
             except (IOError, json.JSONDecodeError) as e:
                 print(f"Warning: Could not read or parse progress file: {e}")
-
-        # --- Final Status Check ---
+        while process.poll() is None:
+            time.sleep(0.1)
         return_code = process.returncode
         if return_code != 0 and (not self.last_known_status or self.last_known_status.get("status") != "Error"):
+            print(f"Process error {return_code}")
             error_status = {
                 "timestamp": time.time(), "job_id": job_id, "status": "Error",
                 "reason": f"Process crashed with exit code {return_code}"
             }
             self.broadcast_status(error_status)
 
-        # --- Cleanup ---
         with self.state_lock:
             self.is_busy = False
             self.current_job_data = None
@@ -205,4 +196,3 @@ class RenderAgent:
 if __name__ == '__main__':
     agent = RenderAgent()
     agent.start_server()
-
