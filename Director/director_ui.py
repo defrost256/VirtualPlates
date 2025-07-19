@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'a_very_secret_key'
 socketio = SocketIO(app, async_mode='threading')
 
-# --- Callbacks and Instances ---
+# --- Callback Functions for DirectorLogic ---
 def on_agent_connected(agent_id, agent_data):
     log_to_ui(f"Successfully connected to agent: {agent_id}")
     on_agent_status_update(agent_id, agent_data)
@@ -24,14 +24,20 @@ def on_agent_status_update(agent_id, status_data):
     payload['all_agents'] = all_agents_status
     socketio.emit('agent_update', payload)
 
+def on_queue_update(queue_data):
+    """Callback to send the current job queue to all web clients."""
+    socketio.emit('queue_update', {'queue': queue_data})
+
 def log_to_ui(message):
     print(message)
     socketio.emit('log_message', {'message': message})
 
+# --- Instantiate the Backend Logic with Callbacks ---
 director_event_callbacks = {
     'on_agent_connected': on_agent_connected,
     'on_agent_disconnected': on_agent_disconnected,
     'on_agent_status_update': on_agent_status_update,
+    'on_queue_update': on_queue_update # Add the new callback
 }
 director_logic = DirectorLogic(log_to_ui, director_event_callbacks)
 job_factory = JobFactory()
@@ -45,11 +51,13 @@ def index():
 @socketio.on('connect')
 def handle_connect():
     print("Web UI client connected.")
+    # Send initial state for agents and the queue
     all_agents = director_logic.get_all_agents()
     for agent_id, agent_info in all_agents.items():
         payload = agent_info.copy()
         payload['all_agents'] = all_agents
         socketio.emit('agent_update', payload)
+    socketio.emit('queue_update', {'queue': director_logic.get_job_queue()})
 
 @socketio.on('add_agent')
 def add_agent(data):
@@ -61,15 +69,16 @@ def disconnect_agent(data):
 
 @socketio.on('submit_job')
 def submit_job(data):
-    agent_id = data.get('agent_id')
+    """Handles request from UI to add a new job to the queue."""
     form_data = data.get('form_data')
-    if not agent_id or not form_data:
-        log_to_ui("Error: Missing agent ID or form data for job submission.")
+    if not form_data:
+        log_to_ui("Error: Missing form data for job submission.")
         return
         
     job_dict = job_factory.create_job_dict(form_data)
     if job_dict:
-        director_logic.submit_job_to_agent(agent_id, job_dict)
+        # The logic is now to add to the queue, not assign directly.
+        director_logic.add_job_to_queue(job_dict)
     else:
         log_to_ui("Error: Failed to create a valid job from the provided parameters.")
 

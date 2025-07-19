@@ -28,6 +28,13 @@
             {% include '_job_factory.html' %}
         </div>
 
+        <div class="panel" id="queue-panel">
+            <h2>Job Queue</h2>
+            <div id="job-queue-list" class="queue-box">
+                <!-- Job queue items will be inserted here by JavaScript -->
+            </div>
+        </div>
+
         <div class="panel" id="status-panel">
             <h2>Render Farm Status</h2>
             <div id="agent-status-container">
@@ -48,6 +55,7 @@
         // --- UI Elements ---
         const addAgentBtn = document.getElementById('btn-add-agent');
         const submitJobBtn = document.getElementById('btn-submit-job');
+        const jobQueueList = document.getElementById('job-queue-list');
         const agentIpInput = document.getElementById('agent-ip');
         const agentSelect = document.getElementById('assign-agent-select');
         const logOutput = document.getElementById('log-output');
@@ -57,11 +65,6 @@
         addAgentBtn.addEventListener('click', () => socket.emit('add_agent', { ip: agentIpInput.value }));
 
         submitJobBtn.addEventListener('click', () => {
-            const agentId = agentSelect.value;
-            if (!agentId) {
-                addLogMessage('Error: Must select an idle agent.');
-                return;
-            }
             
             const formData = {
                 project_path: document.getElementById('project_path').value,
@@ -75,7 +78,7 @@
                 res_y: document.getElementById('res_y').value,
             };
             
-            socket.emit('submit_job', { agent_id: agentId, form_data: formData });
+            socket.emit('submit_job', { form_data: formData });
         });
 
         // --- Socket.IO Event Handlers ---
@@ -91,6 +94,9 @@
              socket.emit('request_agent_list_update');
         });
         socket.on('update_agent_dropdown', (data) => updateAgentDropdown(data.all_agents));
+        socket.on('queue_update', (data) => {
+            updateJobQueue(data.queue);
+        });
 
         // --- UI Update Functions ---
         function addLogMessage(message) {
@@ -181,6 +187,19 @@
             slider.oninput = () => valueInput.value = slider.value;
             valueInput.oninput = () => slider.value = valueInput.value;
         });
+        function updateJobQueue(queue) {
+            jobQueueList.innerHTML = '';
+            if (queue.length === 0) {
+                jobQueueList.innerHTML = '<div class="queue-empty-message">The job queue is empty.</div>';
+                return;
+            }
+            queue.forEach(job => {
+                const jobItem = document.createElement('div');
+                jobItem.className = 'job-queue-item';
+                jobItem.textContent = `Queued: ${job.job_id}`;
+                jobQueueList.appendChild(jobItem);
+            });
+        }
 
     </script>
 </body>

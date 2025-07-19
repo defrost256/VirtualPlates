@@ -2,24 +2,42 @@ import socket
 import threading
 import json
 import os
+from collections import deque
 
 AGENTS_SAVE_FILE = 'director_agents.json'
 
 class DirectorLogic:
     """
-    Handles all the backend logic for the Director, including state management
-    and communication with render agents. This class is UI-agnostic.
+    Handles all the backend logic for the Director, including state management,
+    a job queue, and communication with render agents.
     """
     def __init__(self, log_callback, event_callbacks):
         self.log = log_callback
         self.events = event_callbacks
         self.agents = {}
+        self.job_queue = deque() # Using deque for an efficient queue
         self.agents_lock = threading.Lock()
         self._load_and_connect_agents()
+
+    # --- Public Methods ---
 
     def get_all_agents(self):
         with self.agents_lock:
             return {agent_id: data['public'] for agent_id, data in self.agents.items()}
+
+    def get_job_queue(self):
+        with self.agents_lock:
+            return list(self.job_queue)
+
+    def add_job_to_queue(self, job_dict):
+        """Adds a new job to the queue and tries to dispatch it."""
+        with self.agents_lock:
+            self.job_queue.append(job_dict)
+            self.log(f"Job '{job_dict['job_id']}' added to the queue. Queue size: {len(self.job_queue)}")
+        
+        # Notify UI about the queue change and then try to assign jobs.
+        self.events['on_queue_update'](list(self.job_queue))
+        self._check_queue_and_assign_jobs()
 
     def connect_to_agent(self, ip_port_str):
         if not ip_port_str: return
@@ -40,29 +58,56 @@ class DirectorLogic:
                     self.log(f"Note: Socket error during manual disconnect (may already be closed): {e}")
                 
                 self._remove_agent_from_save_file(agent_info['public']['ip'])
-                # The connection handling thread will clean up the entry from self.agents
             else:
                 self.log(f"Could not disconnect: Agent {agent_id} not found.")
 
-    def submit_job_to_agent(self, agent_id, job_dict):
-        """Sends a pre-constructed job dictionary to a specified agent."""
+    # --- Internal Logic ---
+
+    def _check_queue_and_assign_jobs(self):
+        """Finds idle agents and assigns them jobs from the queue."""
         with self.agents_lock:
-            agent_info = self.agents.get(agent_id)
-            if not agent_info or agent_info['public'].get('status') == 'Disconnected':
-                self.log(f"Error: Agent '{agent_id}' not connected or found.")
-                return
-            if agent_info['public'].get('status') != 'Idle':
-                self.log(f"Error: Agent '{agent_id}' is not Idle.")
-                return
+            if not self.job_queue:
+                return # Nothing to do if queue is empty
+
+            # Find all idle agents
+            idle_agents = [
+                agent_id for agent_id, data in self.agents.items()
+                if data['public'].get('status') == 'Idle'
+            ]
+
+            for agent_id in idle_agents:
+                if not self.job_queue:
+                    break # Stop if we run out of jobs
+                
+                job_to_assign = self.job_queue.popleft()
+                self.log(f"Found idle agent '{agent_id}'. Assigning job '{job_to_assign['job_id']}'.")
+                
+                # We need to call the actual socket send in a new thread
+                # to avoid holding the lock during a network operation.
+                threading.Thread(target=self._send_job_to_agent, args=(agent_id, job_to_assign)).start()
+        
+        # After assignments, notify UI of the queue change
+        self.events['on_queue_update'](list(self.job_queue))
+
+    def _send_job_to_agent(self, agent_id, job_dict):
+        """Sends a job dictionary to a specific agent's socket."""
         try:
+            with self.agents_lock:
+                # Re-fetch agent info inside the thread to ensure it's still valid
+                agent_info = self.agents.get(agent_id)
+                if not agent_info:
+                    raise ConnectionError("Agent disconnected before job could be sent.")
+                agent_socket = agent_info['internal']['socket']
+
             job_data_str = json.dumps(job_dict)
-            agent_socket = agent_info['internal']['socket']
             agent_socket.sendall(job_data_str.encode('utf-8'))
             self.log(f"Successfully sent job '{job_dict['job_id']}' to agent '{agent_id}'.")
-        except socket.error as e:
-            self.log(f"Error sending job to agent '{agent_id}': {e}")
-        except Exception as e:
-            self.log(f"An unexpected error occurred during job submission: {e}")
+        except (socket.error, ConnectionError) as e:
+            self.log(f"Error sending job to agent '{agent_id}': {e}. Re-queuing job.")
+            # If sending fails, put the job back at the front of the queue
+            with self.agents_lock:
+                self.job_queue.appendleft(job_dict)
+            self.events['on_queue_update'](list(self.job_queue))
 
     def _handle_agent_connection(self, ip_port_str):
         # ... (This function remains the same as the previous version) ...
@@ -117,13 +162,27 @@ class DirectorLogic:
                 self.events['on_agent_disconnected'](agent_id)
 
     def _update_agent_state(self, agent_id, status_data):
+        is_now_idle = False
         with self.agents_lock:
             if agent_id in self.agents:
-                if status_data.get('status') == 'Completed':
+                old_status = self.agents[agent_id]['public'].get('status')
+                new_status = status_data.get('status')
+                
+                if new_status == 'Idle' and old_status != 'Idle':
+                    is_now_idle = True
+
+                if new_status == 'Completed':
                     job_id = self.agents[agent_id]['public'].get('job_id')
                     if job_id: self.log(f"Job '{job_id}' on agent '{agent_id}' completed successfully.")
+                
                 self.agents[agent_id]['public'].update(status_data)
+        
         self.events['on_agent_status_update'](agent_id, status_data)
+        
+        # If an agent just became idle, check if there's work for it.
+        if is_now_idle:
+            self.log(f"Agent '{agent_id}' is now idle. Checking job queue...")
+            self._check_queue_and_assign_jobs()
 
     def _load_and_connect_agents(self):
         try:
