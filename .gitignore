@@ -37,3 +37,4 @@ DerivedDataCache/
 !**/Python/
 *.png
 *.exr
+Saved/Config/CrashReportClient/*

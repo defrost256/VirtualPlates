@@ -49,7 +49,7 @@ class JobFactoryUI {
     }
 
     // --- Sequence Tree Methods ---
-    addSequence(path = '/Game/NewSequence', cameras = ['NewCamera']) {
+    addSequence(path = '/Game/SEQ_MainComp', cameras = ['NewCamera']) {
         const seqId = `seq-${Date.now()}`;
         const seqNode = document.createElement('div');
         seqNode.className = 'preset-item sequence-node';
