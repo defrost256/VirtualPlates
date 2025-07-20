@@ -39,6 +39,21 @@ class DirectorLogic:
         self.events['on_queue_update'](list(self.job_queue))
         self._check_queue_and_assign_jobs()
 
+    def add_job_batch_to_queue(self, job_batch):
+        """Adds a batch of new jobs to the queue and then tries to dispatch them."""
+        if not job_batch:
+            return
+
+        with self.agents_lock:
+            for job_dict in job_batch:
+                self.job_queue.append(job_dict)
+            self.log(f"Added batch of {len(job_batch)} jobs. New queue size: {len(self.job_queue)}")
+        
+        # Notify UI about the queue change once after adding the whole batch.
+        self.events['on_queue_update'](list(self.job_queue))
+        # And then try to assign jobs once.
+        self._check_queue_and_assign_jobs()
+
     def connect_to_agent(self, ip_port_str):
         if not ip_port_str: return
         self.log(f"UI requested connection to agent: {ip_port_str}")

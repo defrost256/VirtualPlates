@@ -25,7 +25,6 @@ def on_agent_status_update(agent_id, status_data):
     socketio.emit('agent_update', payload)
 
 def on_queue_update(queue_data):
-    """Callback to send the current job queue to all web clients."""
     socketio.emit('queue_update', {'queue': queue_data})
 
 def log_to_ui(message):
@@ -37,7 +36,7 @@ director_event_callbacks = {
     'on_agent_connected': on_agent_connected,
     'on_agent_disconnected': on_agent_disconnected,
     'on_agent_status_update': on_agent_status_update,
-    'on_queue_update': on_queue_update # Add the new callback
+    'on_queue_update': on_queue_update
 }
 director_logic = DirectorLogic(log_to_ui, director_event_callbacks)
 job_factory = JobFactory()
@@ -69,18 +68,18 @@ def disconnect_agent(data):
 
 @socketio.on('submit_job')
 def submit_job(data):
-    """Handles request from UI to add a new job to the queue."""
+    """Handles request from UI to generate and queue a batch of jobs."""
     form_data = data.get('form_data')
     if not form_data:
         log_to_ui("Error: Missing form data for job submission.")
         return
         
-    job_dict = job_factory.create_job_dict(form_data)
-    if job_dict:
-        # The logic is now to add to the queue, not assign directly.
-        director_logic.add_job_to_queue(job_dict)
+    job_batch = job_factory.create_job_batch(form_data)
+    if job_batch:
+        log_to_ui(f"Generated a batch of {len(job_batch)} jobs. Adding to queue...")
+        director_logic.add_job_batch_to_queue(job_batch)
     else:
-        log_to_ui("Error: Failed to create a valid job from the provided parameters.")
+        log_to_ui("Error: Failed to create any jobs from the provided parameters. Check your presets.")
 
 @socketio.on('request_agent_list_update')
 def request_agent_list():

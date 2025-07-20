@@ -30,15 +30,13 @@
 
         <div class="panel" id="queue-panel">
             <h2>Job Queue</h2>
-            <div id="job-queue-list" class="queue-box">
-                <!-- Job queue items will be inserted here by JavaScript -->
-            </div>
+            <div id="job-queue-list" class="queue-box"></div>
         </div>
 
         <div class="panel" id="status-panel">
             <h2>Render Farm Status</h2>
             <div id="agent-status-container">
-                <!-- Agent status cards will be inserted here by JavaScript -->
+                <!-- Agent cards are now fully managed by JavaScript -->
             </div>
         </div>
 
@@ -48,159 +46,10 @@
         </div>
     </div>
 
+    <!-- Load external scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
-    <script>
-        const socket = io();
-
-        // --- UI Elements ---
-        const addAgentBtn = document.getElementById('btn-add-agent');
-        const submitJobBtn = document.getElementById('btn-submit-job');
-        const jobQueueList = document.getElementById('job-queue-list');
-        const agentIpInput = document.getElementById('agent-ip');
-        const agentSelect = document.getElementById('assign-agent-select');
-        const logOutput = document.getElementById('log-output');
-        const agentStatusContainer = document.getElementById('agent-status-container');
-
-        // --- Event Listeners ---
-        addAgentBtn.addEventListener('click', () => socket.emit('add_agent', { ip: agentIpInput.value }));
-
-        submitJobBtn.addEventListener('click', () => {
-            
-            const formData = {
-                project_path: document.getElementById('project_path').value,
-                graph_path: document.getElementById('graph_path').value,
-                level_path: document.getElementById('level_path').value,
-                sequence_path: document.getElementById('sequence_path').value,
-                camera_name: document.getElementById('camera_name').value,
-                time_of_day: document.getElementById('time_of_day').value,
-                cloud_coverage: document.getElementById('cloud_coverage').value,
-                res_x: document.getElementById('res_x').value,
-                res_y: document.getElementById('res_y').value,
-            };
-            
-            socket.emit('submit_job', { form_data: formData });
-        });
-
-        // --- Socket.IO Event Handlers ---
-        socket.on('connect', () => addLogMessage('Successfully connected to Director backend.'));
-        socket.on('log_message', (data) => addLogMessage(data.message));
-        socket.on('agent_update', (data) => {
-            updateAgentStatus(data);
-            updateAgentDropdown(data.all_agents);
-        });
-        socket.on('disconnect_agent', (data) => {
-             const agentCard = document.getElementById(`agent-card-${data.agent_id}`);
-             if (agentCard) agentCard.remove();
-             socket.emit('request_agent_list_update');
-        });
-        socket.on('update_agent_dropdown', (data) => updateAgentDropdown(data.all_agents));
-        socket.on('queue_update', (data) => {
-            updateJobQueue(data.queue);
-        });
-
-        // --- UI Update Functions ---
-        function addLogMessage(message) {
-            const time = new Date().toLocaleTimeString();
-            logOutput.innerHTML += `<div>[${time}] ${message}</div>`;
-            logOutput.scrollTop = logOutput.scrollHeight;
-        }
-
-        function updateAgentDropdown(agents) {
-            agentSelect.innerHTML = '';
-            let idleAgentFound = false;
-            for (const agentId in agents) {
-                const agent = agents[agentId];
-                if (agent.status === 'Idle') {
-                    const option = document.createElement('option');
-                    option.value = agentId;
-                    option.textContent = `${agentId} (Idle)`;
-                    agentSelect.appendChild(option);
-                    idleAgentFound = true;
-                }
-            }
-            if (!idleAgentFound) {
-                agentSelect.innerHTML = '<option value="">-- No Idle Agents --</option>';
-            }
-        }
-
-        function updateAgentStatus(agentData) {
-            const agentId = agentData.agent_id;
-            let agentCard = document.getElementById(`agent-card-${agentId}`);
-
-            if (!agentCard) {
-                agentCard = document.createElement('div');
-                agentCard.id = `agent-card-${agentId}`;
-                agentStatusContainer.appendChild(agentCard);
-            }
-            
-            const status = agentData.status || 'Connecting...';
-            agentCard.className = `agent-card status-${status.toLowerCase()}`;
-
-            // This is a client-side template for the agent card content
-            agentCard.innerHTML = `
-                <div class="agent-card-header">
-                    <h3>AGENT: ${agentId}</h3>
-                    <div class="status-line"><strong>Status:</strong> <span class="status-text">${status}</span></div>
-                </div>
-                <div class="agent-card-details">
-                    <div class="status-line"><strong>IP Address:</strong> ${agentData.ip}</div>
-                    <div class="status-line"><strong>Current Job:</strong> ${agentData.job_id || 'N/A'}</div>
-                    ${status === 'Rendering' ? `
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: ${agentData.progress * 100}%"></div>
-                        </div>
-                        <div class="status-line">Progress: <strong>${(agentData.progress * 100).toFixed(1)}%</strong> (Frame: ${agentData.current_frame})</div>
-                    ` : ''}
-                    <button class="btn-disconnect" data-agent-id="${agentId}">Disconnect</button>
-                </div>
-            `;
-            bindAgentCardEvents(agentCard);
-        }
-        
-        function bindAgentCardEvents(cardElement) {
-            const header = cardElement.querySelector('.agent-card-header');
-            header.addEventListener('click', () => {
-                cardElement.classList.toggle('expanded');
-            });
-            
-            const disconnectBtn = cardElement.querySelector('.btn-disconnect');
-            disconnectBtn.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent card from toggling when button is clicked
-                const agentId = e.target.dataset.agentId;
-                if (confirm(`Are you sure you want to disconnect agent ${agentId}?`)) {
-                    socket.emit('disconnect_agent_request', { agent_id: agentId });
-                }
-            });
-        }
-        
-        // --- Job Factory UI Logic ---
-        function openTab(evt, tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = "none");
-            document.querySelectorAll('.tab-link').forEach(link => link.className = link.className.replace(" active", ""));
-            document.getElementById(tabName).style.display = "block";
-            evt.currentTarget.className += " active";
-        }
-        
-        document.querySelectorAll('.slider-group').forEach(group => {
-            const slider = group.querySelector('.slider');
-            const valueInput = group.querySelector('.slider-value');
-            slider.oninput = () => valueInput.value = slider.value;
-            valueInput.oninput = () => slider.value = valueInput.value;
-        });
-        function updateJobQueue(queue) {
-            jobQueueList.innerHTML = '';
-            if (queue.length === 0) {
-                jobQueueList.innerHTML = '<div class="queue-empty-message">The job queue is empty.</div>';
-                return;
-            }
-            queue.forEach(job => {
-                const jobItem = document.createElement('div');
-                jobItem.className = 'job-queue-item';
-                jobItem.textContent = `Queued: ${job.job_id}`;
-                jobQueueList.appendChild(jobItem);
-            });
-        }
-
-    </script>
+    <script src="/static/agent_card.js"></script>
+    <script src="/static/job_factory.js"></script>
+    <script src="/static/director.js"></script>
 </body>
 </html>
